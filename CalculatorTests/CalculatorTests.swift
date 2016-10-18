@@ -13,7 +13,7 @@ class CalculatorTests: XCTestCase {
     func testDescription() {
         
         // a. touching 7 + would show “7 + ...” (with 7 still in the display)
-        let brain = CalculatorBrain()
+        let brain = CalculatorBrain(decimalDigits: 6)
         brain.setOperand(7)
         brain.performOperation("+")
         XCTAssertEqual(brain.description, "7 + ")

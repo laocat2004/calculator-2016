@@ -10,27 +10,27 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    @IBOutlet private weak var display: UILabel!
+    @IBOutlet fileprivate weak var display: UILabel!
     
-    @IBOutlet private weak var history: UILabel!
+    @IBOutlet fileprivate weak var history: UILabel!
     
-    private var userIsInTheMiddleOfTyping = false {
+    fileprivate var userIsInTheMiddleOfTyping = false {
         didSet {
             if !userIsInTheMiddleOfTyping {
                 userIsInTheMiddleOfFloatingPointNummer = false
             }
         }
     }
-    private var userIsInTheMiddleOfFloatingPointNummer = false
+    fileprivate var userIsInTheMiddleOfFloatingPointNummer = false
     
-    private let decimalSeparator = NSNumberFormatter().decimalSeparator!
+    fileprivate let decimalSeparator = NumberFormatter().decimalSeparator!
     
-    private struct Constants {
+    fileprivate struct Constants {
         static let DecimalDigits = 6
     }
     
     
-    @IBAction private func touchDigit(sender: UIButton) {
+    @IBAction fileprivate func touchDigit(_ sender: UIButton) {
         var digit = sender.currentTitle!
         
         if digit == decimalSeparator {
@@ -52,19 +52,19 @@ class ViewController: UIViewController {
         }
     }
     
-    private var displayValue: Double? {
+    fileprivate var displayValue: Double? {
         get {
-            if let text = display.text, value = NSNumberFormatter().numberFromString(text)?.doubleValue {
+            if let text = display.text, let value = NumberFormatter().number(from: text)?.doubleValue {
                 return value
             }
             return nil
         }
         set {
             if let value = newValue {
-                let formatter = NSNumberFormatter()
-                formatter.numberStyle = .DecimalStyle
+                let formatter = NumberFormatter()
+                formatter.numberStyle = .decimal
                 formatter.maximumFractionDigits = Constants.DecimalDigits
-                display.text = formatter.stringFromNumber(value)
+                display.text = formatter.string(from: NSNumber(value: value))
                 history.text = brain.description + (brain.isPartialResult ? " …" : " =")
             } else {
                 display.text = "0"
@@ -74,9 +74,9 @@ class ViewController: UIViewController {
         }
     }
     
-    private var brain = CalculatorBrain(decimalDigits: Constants.DecimalDigits)
+    fileprivate var brain = CalculatorBrain(decimalDigits: Constants.DecimalDigits)
     
-    @IBAction private func performOperation(sender: UIButton) {
+    @IBAction fileprivate func performOperation(_ sender: UIButton) {
         if userIsInTheMiddleOfTyping {
             brain.setOperand(displayValue!)
             userIsInTheMiddleOfTyping = false
@@ -87,10 +87,10 @@ class ViewController: UIViewController {
         displayValue = brain.result
     }
     
-    @IBAction func backSpace(sender: UIButton) {
+    @IBAction func backSpace(_ sender: UIButton) {
         if userIsInTheMiddleOfTyping {
             if var text = display.text {
-                text.removeAtIndex(text.endIndex.predecessor())
+                text.remove(at: text.characters.index(before: text.endIndex))
                 if text.isEmpty {
                     text = "0"
                     userIsInTheMiddleOfTyping = false
@@ -100,22 +100,22 @@ class ViewController: UIViewController {
         }
     }
     
-    @IBAction func clearEverything(sender: UIButton) {
+    @IBAction func clearEverything(_ sender: UIButton) {
         brain = CalculatorBrain(decimalDigits: Constants.DecimalDigits)
         displayValue = nil
     }
     
-    private func adjustButtonLayout(view: UIView, portrait: Bool) {
+    fileprivate func adjustButtonLayout(_ view: UIView, portrait: Bool) {
         for subview in view.subviews {
             if subview.tag == 1 {
-                subview.hidden = portrait
+                subview.isHidden = portrait
             } else if subview.tag == 2 {
-                subview.hidden = !portrait
+                subview.isHidden = !portrait
             }
             if let button = subview as? UIButton {
-                button.setBackgroundColor(UIColor.blackColor(), forState: .Highlighted)
+                button.setBackgroundColor(UIColor.black, forState: .highlighted)
                 if button.tag == 3 {
-                    button.setTitle(decimalSeparator, forState: .Normal)
+                    button.setTitle(decimalSeparator, for: UIControlState())
                 }
             } else if let stack = subview as? UIStackView {
                 adjustButtonLayout(stack, portrait: portrait);
@@ -125,26 +125,26 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        adjustButtonLayout(view, portrait: traitCollection.horizontalSizeClass == .Compact && traitCollection.verticalSizeClass == .Regular)
+        adjustButtonLayout(view, portrait: traitCollection.horizontalSizeClass == .compact && traitCollection.verticalSizeClass == .regular)
     }
     
-    override func willTransitionToTraitCollection(newCollection: UITraitCollection, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
-        super.willTransitionToTraitCollection(newCollection, withTransitionCoordinator: coordinator)
-        adjustButtonLayout(view, portrait: newCollection.horizontalSizeClass == .Compact && newCollection.verticalSizeClass == .Regular)
+    override func willTransition(to newCollection: UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.willTransition(to: newCollection, with: coordinator)
+        adjustButtonLayout(view, portrait: newCollection.horizontalSizeClass == .compact && newCollection.verticalSizeClass == .regular)
     }
     
 }
 
 extension UIButton {
-    func setBackgroundColor(color: UIColor, forState state: UIControlState) {
-        let rect = CGRectMake(0.0, 0.0, 1.0, 1.0)
+    func setBackgroundColor(_ color: UIColor, forState state: UIControlState) {
+        let rect = CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0)
         UIGraphicsBeginImageContextWithOptions(rect.size, false, 0)
         let context = UIGraphicsGetCurrentContext();
         color.setFill()
-        CGContextFillRect(context, rect)
+        context!.fill(rect)
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        setBackgroundImage(image, forState: state);
+        setBackgroundImage(image, for: state);
     }
 }
 
